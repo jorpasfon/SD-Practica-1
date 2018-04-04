@@ -18,7 +18,8 @@ class Executor(object):
 
     def mapper(self, map_fun, reduce_fun, file, sender):
         res = map_fun(file)
-        self.reducer = self.host.lookup_url(sender.get_name(), 'Reducer', 'Server')
+        self.reducer = self.host.lookup_url(
+            sender.get_name(), 'Reducer', 'Server')
         self.reducer.set_dict(res, reduce_fun)
 
 
@@ -96,33 +97,13 @@ if __name__ == "__main__":
     registry = host.lookup_url('http://127.0.0.1:6000/regis', 'Registry',
                                'Registry')
 
-    remote_host = registry.lookup('host1')
-    remote_host2 = registry.lookup('host2')
-    remote_host3 = registry.lookup('host3')
-    remote_host4 = registry.lookup('host4')
-    remote_host5 = registry.lookup('host5')
-    print(remote_host)
-    print(remote_host2)
-    print(remote_host3)
-    print(remote_host4)
-    print(remote_host5)
-    n_workers = 5
+    hosts = registry.get_all()
+    n_workers = len(hosts)
     path_fitxer = "/projects/SD/Prac1/Proves/big2.txt"
     start_time = time.time()
     local_host.set_params(n_workers, start_time)
-    server = remote_host.spawn('server', 'Server/Executor')
-    server.mapper(mapper2, merge, path_fitxer, local_host.get_proxy())
-
-    server2 = remote_host2.spawn('server2', 'Server/Executor')
-    server2.mapper(mapper2, merge, path_fitxer, local_host.get_proxy())
-
-    server3 = remote_host3.spawn('server3', 'Server/Executor')
-    server3.mapper(mapper2, merge, path_fitxer, local_host.get_proxy())
-
-    server4 = remote_host4.spawn('server4', 'Server/Executor')
-    server4.mapper(mapper2, merge, path_fitxer, local_host.get_proxy())
-
-    server5 = remote_host5.spawn('server5', 'Server/Executor')
-    server5.mapper(mapper2, merge, path_fitxer, local_host.get_proxy())
-
+    for host in hosts:
+        print(host)
+        server = host.spawn('server', 'Server/Executor')
+        server.mapper(mapper2, merge, path_fitxer, local_host.get_proxy())
     serve_forever()
